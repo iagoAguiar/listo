@@ -49,6 +49,13 @@ export class BancoListo extends Dexie {
   declare produtos: Table<ProdutoRegistro, string>;
 }
 
-export function criarBanco(_nome = "listo"): BancoListo {
-  throw new Error("não implementado: criarBanco (R1)");
+/** R1: banco `listo` v1 com as três tabelas e os índices da spec. */
+export function criarBanco(nome = "listo"): BancoListo {
+  const db = new BancoListo(nome);
+  db.version(1).stores({
+    listas: "id, data, status, data_conclusao",
+    itens: "id, lista_id, [lista_id+ordem]",
+    produtos: "id, &nome_normalizado",
+  });
+  return db;
 }
