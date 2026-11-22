@@ -1,0 +1,29 @@
+# Ferramentas
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Node
+node_modules/
+dist/
+build/
+.next/
+
+# Segredos e ambiente
+.env
+.env.*
+!.env.example
+
+# Banco e dados locais
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Sistema / editor
+.DS_Store
+Thumbs.db
+*.log
