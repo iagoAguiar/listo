@@ -5,3 +5,5 @@ tests/aceite/dinheiro.test.ts
 tests/aceite/itens.test.ts
 tests/aceite/lista.test.ts
 tests/aceite/persistencia.test.ts
+tests/aceite/telas.test.tsx
+tests/aceite/compra.test.tsx
