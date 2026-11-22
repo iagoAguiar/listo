@@ -39,7 +39,7 @@ R10. Ao digitar o nome do item, o app sugere até 5 produtos do catálogo cujo n
 R11. Escolher produto da sugestão preenche o preço com o `ultimo_preco_centavos`; se não
 houver, usa `preco_padrao_centavos`.
 R12. Editar quantidade ou preço de um item recalcula seu parcial e os totais da lista na hora.
-R13. Remover item é imediato e oferece "Desfazer" por 5 segundos.
+R13. Remover item é imediato e oferece "Desfazer" por 8 segundos.
 R14. Todo item gravado alimenta o catálogo: cria o produto se não existir (match por nome
 normalizado) e atualiza `ultimo_preco_centavos`; nome repetido não duplica registro.
 
@@ -51,6 +51,7 @@ R16. `total_estimado_centavos` = soma dos parciais de todos os itens da lista.
 R17. `saldo_centavos` = `orcamento_centavos` − `total_estimado_centavos`, exibido com sinal
 ("R$ 25,50 abaixo do orçamento" / "R$ 25,50 acima do orçamento") e cor de alerta quando negativo.
 R18. `total_carrinho_centavos` = soma dos parciais apenas dos itens com `adquirido = true`.
+É informativo: mede o progresso da compra e **não** define o valor final.
 R19. Todo total é recalculado no mesmo ciclo da ação que o alterou, sem recarregar a tela e
 sem chamada de rede.
 
@@ -70,12 +71,15 @@ R26. O modo compra funciona com a rede desligada, inclusive marcar, editar, adic
 
 ### M-06 · Finalizar compra
 
-R27. Finalizar abre resumo com: valor final, orçamento, diferença (acima/abaixo), número de
-itens no carrinho e aviso com a quantidade de itens não marcados.
-R28. Confirmar grava `valor_final_centavos = total_carrinho_centavos`, status `concluida` e
-`data_conclusao` = hoje; a lista passa a ser somente leitura.
+R27. Finalizar abre resumo com: valor final (soma de **todos** os itens, marcados ou não),
+valor no carrinho (informativo), orçamento, diferença (acima/abaixo) e a contagem de itens
+marcados e não marcados.
+R28. Confirmar grava `valor_final_centavos` = soma dos parciais de **todos** os itens da lista,
+adquiridos ou não; status `concluida` e `data_conclusao` = hoje; a lista passa a ser somente
+leitura.
 R29. Voltar do resumo sem confirmar retorna ao modo compra sem alterar nada.
-R30. Itens não marcados permanecem registrados no histórico e não somam no valor final.
+R30. Item não marcado continua contabilizado no valor final. Ele sai do total apenas se for
+excluído — pelo próprio item (R13) ou pela ação em lote do resumo (R45).
 
 ### M-07 · Início e histórico
 
@@ -105,6 +109,8 @@ R42. Orçamento `0` é inválido; não existe orçamento "ilimitado" no MVP.
 R43. O app oferece "Exportar backup" gerando um JSON com listas, itens e produtos.
 R44. O app oferece "Importar backup": valida o JSON e acrescenta as listas com identificadores
 novos, sem sobrescrever o que já existe.
+R45. No resumo de finalização, os itens não marcados aparecem listados com a ação
+"Excluir não marcados", que os remove de uma vez antes da confirmação.
 
 ## Critério de aceite
 
@@ -132,8 +138,8 @@ CA-R11: dado produto com último preço R$ 7,49, quando escolho a sugestão, ent
 vem preenchido com 749.
 CA-R12: dado item de 2 × R$ 10,00, quando mudo a quantidade para 3, então o parcial vira
 R$ 30,00 e o total da lista se atualiza na mesma ação.
-CA-R13: dado um item removido, quando clico em "Desfazer" em até 5 s, então o item volta com
-quantidade e preço originais.
+CA-R13: dado um item removido, quando clico em "Desfazer" em até 8 s, então o item volta com
+quantidade e preço originais; após 8 s o toast desaparece e o item continua excluído.
 CA-R14: dado dois itens com o nome "Arroz 5kg", quando o segundo é salvo, então existe um único
 produto no catálogo com o último preço atualizado.
 CA-R15: dado item de 0,750 kg a R$ 39,90/kg, quando calculo o parcial, então o resultado é
@@ -160,14 +166,16 @@ CA-R25: dado o formulário rápido preenchido, quando confirmo, então o item ap
 somado ao total no carrinho.
 CA-R26: dado o app com a rede desligada, quando percorro modo compra e finalizo, então todas as
 ações funcionam e aparecem no histórico.
-CA-R27: dado carrinho com R$ 150,00 e orçamento de R$ 200,00, quando clico em finalizar, então
-vejo valor final R$ 150,00, diferença R$ 50,00 abaixo e a contagem de itens não marcados.
+CA-R27: dado R$ 150,00 marcado e R$ 40,00 não marcado, com orçamento de R$ 200,00, quando clico
+em finalizar, então vejo valor final R$ 190,00 (todos os itens), "R$ 10,00 abaixo do orçamento"
+e a contagem de marcados e não marcados.
 CA-R28: dado o resumo de finalização, quando confirmo, então a lista fica `concluida` com
-valor final gravado e a edição de itens passa a ser bloqueada.
+`valor_final_centavos` igual à soma de todos os itens, inclusive os não marcados, e a edição de
+itens passa a ser bloqueada.
 CA-R29: dado o resumo de finalização, quando volto, então o status continua `comprando` e os
 totais seguem iguais.
 CA-R30: dado item não marcado ao finalizar, quando abro o detalhe da compra, então o item
-aparece registrado como não adquirido e fora do valor final.
+aparece como não adquirido **e** seu parcial está somado no valor final.
 CA-R31: dado compras concluídas em meses diferentes, quando abro o início, então o total
 mostrado soma apenas as do mês corrente.
 CA-R32: dado 7 compras concluídas, quando abro o início, então vejo 5, da mais recente para a
@@ -195,6 +203,9 @@ CA-R43: dado o app com 2 listas, quando exporto o backup, então um arquivo JSON
 as listas, itens e produtos.
 CA-R44: dado um arquivo de backup válido, quando importo, então as listas entram com novos
 identificadores e as existentes permanecem intactas.
+CA-R45: dado 3 itens não marcados no resumo, quando clico em "Excluir não marcados", então os 3
+saem da lista, o valor final cai para a soma dos restantes e a exclusão pode ser desfeita até a
+confirmação.
 
 ## Dados e persistência
 
@@ -219,8 +230,9 @@ IndexedDB via Dexie, banco `listo` v1.
 `ultimo_preco_centavos` (int) · `criado_em` · `atualizado_em`
 Índice único: `nome_normalizado`
 
-**Calculado, nunca gravado no MVP:** parcial do item, total estimado, saldo, total no carrinho.
-`valor_final_centavos` é a única soma congelada (ao concluir).
+**Calculado, nunca gravado no MVP:** parcial do item, total estimado, saldo, total no carrinho
+(informativo). `valor_final_centavos` é a única soma congelada (ao concluir): soma dos parciais
+de todos os itens da lista.
 
 ## Telas e navegação
 
@@ -252,3 +264,6 @@ histórico. Tudo isso está em `ROADMAP.md` (V1/V2/V3).
    e sync não exija recriar o banco.
 5. **Escopo do modo compra crescer.** É a tela mais gostosa de melhorar. Mitigação: qualquer
    ideia nova vai para `ROADMAP.md`, não para esta spec.
+6. **Checkbox sem efeito financeiro confunde.** Como item não marcado conta no valor final, o
+   usuário pode achar que economizou. Mitigação: o resumo de finalização escancara "X marcados,
+   Y não marcados, valor final soma os dois" e oferece "Excluir não marcados" (R45).

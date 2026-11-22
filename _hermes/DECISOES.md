@@ -51,3 +51,17 @@ Sessão por token opaco em cookie `HttpOnly` (sem JWT no cliente). Sync por
 **Consequência:** backend entra só na V1 — o MVP não depende dele. NestJS fica reservado para
 o cenário de colaboração em tempo real (V3-01) com time maior. Tipos do front vêm do OpenAPI
 via `openapi-typescript`.
+
+## D-005 — Item não marcado conta no valor final; só sai se excluído
+
+**Data:** 2026-11-22 · **Aprovação:** Iago, fala literal: "Não, ele deve sempre contabilizar,
+só não contabiliza se for excluido."
+**Contexto:** no resumo de finalização, o doc base deixava o "Total no Carrinho" (itens
+marcados) virar o valor gravado, e itens não marcados ficavam fora do gasto.
+**Decisão:** `valor_final_centavos` é a soma dos parciais de **todos** os itens da lista,
+marcados ou não. O checkbox passa a medir progresso, não dinheiro: `total_carrinho_centavos`
+vira informativo. Para tirar um item do gasto, o caminho é excluir — pelo item (R13, desfazer
+de 8 s) ou pela ação em lote "Excluir não marcados" no resumo (R45, nova).
+**Consequência:** o gasto do mês reflete a lista inteira, não o que foi riscado no corredor.
+Risco de leitura errada pelo usuário → o resumo escancara "X marcados / Y não marcados" e
+oferece a exclusão em lote.

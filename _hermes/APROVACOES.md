@@ -9,12 +9,13 @@
 | A-06 | Renumerar RF duplicados (006/007) e padronizar o nome **ListO** no doc | sim | baixo | ✅ aprovado 2026-11-22 |
 | A-05 | Stack técnica (detalhada em D-003) | Vite + React 19 + TS strict + Dexie + Zustand + Tailwind + Vitest/Playwright + PWA | alto depois de 1 fatia | ✅ aprovado 2026-11-22 |
 | A-05b | Backend da V1 (detalhado em D-004) | FastAPI + Postgres (Supabase descartado pelo Iago) | alto depois de 1 fatia | ✅ aprovado 2026-11-22 |
-| A-07 | Aprovar `_hermes/spec.md` do MVP (R1–R44 / CA-R1–CA-R44) | aprovar | alto | ⏳ aguardando |
+| A-07 | Aprovar `_hermes/spec.md` do MVP (R1–R45 / CA-R1–CA-R45) | aprovar | alto | ⏳ aguardando fala final |
 
-Falas literais do Iago em 2026-11-22:
-- "Ok todo o restante está aprovado, mas qual stack escolhida?" → A-01, A-02, A-03, A-04, A-06.
-- "Ok, mas o backend não quero via Supabase, podemos ir de FastAPI ou Node, ou Nestjs…" → A-05 (front).
-- "ok aceito ser feito em FastAPI" → A-05b (backend).
+Respostas do Iago aos 5 pontos da spec (2026-11-22): "1- Sim, mas aumente para 8s / 2- Sim. /
+3- Não, ele deve sempre contabilizar, só não contabiliza se for excluido. / 4- Sim. / 5- Sim."
+Aplicado: R13 e CA-R13 com desfazer de **8 s**; R27/R28/R30 e CAs reescritos para o valor final
+somar **todos** os itens; R18 marcado como informativo; **R45/CA-R45 novos** ("Excluir não
+marcados" no resumo); risco 6 registrado. ADR em `D-005`.
 
-Enquanto A-07 estiver aberta, não escrevo teste de aceite nem código — sem
-`.hermes-flow/gates/spec.approved` o hook bloqueia.
+Falta a fala literal aprovando o artefato `spec.md` como está — sem ela não gravo
+`.hermes-flow/gates/spec.approved` e o hook continua bloqueando código.
