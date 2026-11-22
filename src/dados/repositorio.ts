@@ -1,6 +1,7 @@
 import type { Centavos } from "../dominio/dinheiro";
 import { normalizarNome, validarItem, type DadosNovoItem } from "../dominio/item";
 import {
+  totalEstimadoCentavos,
   validarLista,
   valorFinalCentavos,
   type DadosNovaLista,
@@ -14,17 +15,22 @@ export interface SugestaoProduto {
   precoSugeridoCentavos: Centavos;
 }
 
+/** Campos editáveis de um item — camelCase no limite do repositório. */
+export interface PatchItem {
+  nome?: string;
+  quantidadeMilesimos?: number;
+  precoUnitarioCentavos?: Centavos;
+}
+
 export interface Repositorio {
   criarLista(dados: DadosNovaLista): Promise<ListaRegistro>;
   listarListas(): Promise<ListaRegistro[]>;
+  listarListasComTotais(): Promise<Array<ListaRegistro & { totalEstimadoCentavos: Centavos }>>;
   obterLista(id: string): Promise<ListaRegistro | undefined>;
   excluirLista(id: string): Promise<void>;
 
   adicionarItem(listaId: string, dados: DadosNovoItem): Promise<ItemRegistro>;
-  editarItem(
-    id: string,
-    patch: Partial<Pick<ItemRegistro, "nome" | "quantidade_milesimos" | "preco_unitario_centavos">>,
-  ): Promise<ItemRegistro>;
+  editarItem(id: string, patch: PatchItem): Promise<ItemRegistro>;
   removerItem(id: string): Promise<void>;
   restaurarItem(item: ItemRegistro): Promise<void>;
   listarItens(listaId: string): Promise<ItemRegistro[]>;
@@ -141,6 +147,19 @@ export function criarRepositorio(db: BancoListo): Repositorio {
       return db.listas.orderBy("data").reverse().toArray();
     },
 
+    async listarListasComTotais() {
+      const listas = await db.listas.orderBy("data").reverse().toArray();
+      const comTotais = [];
+      for (const lista of listas) {
+        const itens = await db.itens.where("lista_id").equals(lista.id).sortBy("ordem");
+        comTotais.push({
+          ...lista,
+          totalEstimadoCentavos: totalEstimadoCentavos(itens.map(paraItemDaLista)),
+        });
+      }
+      return comTotais;
+    },
+
     async obterLista(id) {
       return db.listas.get(id);
     },
@@ -183,8 +202,8 @@ export function criarRepositorio(db: BancoListo): Repositorio {
       exigirEditavel(await db.listas.get(item.lista_id));
 
       const nome = patch.nome ?? item.nome;
-      const quantidadeMilesimos = patch.quantidade_milesimos ?? item.quantidade_milesimos;
-      const precoUnitarioCentavos = patch.preco_unitario_centavos ?? item.preco_unitario_centavos;
+      const quantidadeMilesimos = patch.quantidadeMilesimos ?? item.quantidade_milesimos;
+      const precoUnitarioCentavos = patch.precoUnitarioCentavos ?? item.preco_unitario_centavos;
 
       const validacao = validarItem({ nome, quantidadeMilesimos, precoUnitarioCentavos });
       if (!validacao.ok) throw new Error(`item inválido: ${validacao.erros.join("; ")}`);
