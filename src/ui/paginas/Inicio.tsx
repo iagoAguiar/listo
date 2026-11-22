@@ -54,7 +54,10 @@ export default function Inicio() {
           <section>
             <h2>Últimas compras</h2>
             {recentes.length === 0 ? (
-              <p className="vazio">Nenhuma compra concluída ainda.</p>
+              <p className="vazio">
+                Nenhuma compra concluída ainda.{" "}
+                <Link to="/listas/nova">Criar primeira lista</Link>
+              </p>
             ) : (
               <ul className="lista-limpa">
                 {recentes.map((lista) => (

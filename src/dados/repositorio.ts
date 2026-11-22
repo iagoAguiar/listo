@@ -1,4 +1,5 @@
 import type { Centavos } from "../dominio/dinheiro";
+import type { FormaPagamento, TipoCompra } from "../dominio/lista";
 import { normalizarNome, validarItem, type DadosNovoItem } from "../dominio/item";
 import {
   totalEstimadoCentavos,
@@ -16,6 +17,24 @@ export interface SugestaoProduto {
 }
 
 /** Campos editáveis de um item — camelCase no limite do repositório. */
+export interface PatchLista {
+  nome?: string;
+  data?: string;
+  tipo?: TipoCompra;
+  orcamentoCentavos?: Centavos;
+  mercado?: string;
+  formaPagamento?: FormaPagamento;
+}
+
+export interface OpcoesNovoItem {
+  /** R25: item criado dentro do modo compra já nasce adquirido. */
+  adquirido?: boolean;
+}
+
+export interface ResultadoImportacao {
+  importados: number;
+}
+
 export interface PatchItem {
   nome?: string;
   quantidadeMilesimos?: number;
@@ -26,10 +45,14 @@ export interface Repositorio {
   criarLista(dados: DadosNovaLista): Promise<ListaRegistro>;
   listarListas(): Promise<ListaRegistro[]>;
   listarListasComTotais(): Promise<Array<ListaRegistro & { totalEstimadoCentavos: Centavos }>>;
+  editarLista(id: string, patch: PatchLista): Promise<ListaRegistro>;
+  iniciarCompra(id: string): Promise<ListaRegistro>;
+  exportarBackup(): Promise<string>;
+  importarBackup(json: string): Promise<ResultadoImportacao>;
   obterLista(id: string): Promise<ListaRegistro | undefined>;
   excluirLista(id: string): Promise<void>;
 
-  adicionarItem(listaId: string, dados: DadosNovoItem): Promise<ItemRegistro>;
+  adicionarItem(listaId: string, dados: DadosNovoItem, opcoes?: OpcoesNovoItem): Promise<ItemRegistro>;
   editarItem(id: string, patch: PatchItem): Promise<ItemRegistro>;
   removerItem(id: string): Promise<void>;
   restaurarItem(item: ItemRegistro): Promise<void>;
@@ -160,6 +183,116 @@ export function criarRepositorio(db: BancoListo): Repositorio {
       return comTotais;
     },
 
+    async editarLista(id, patch) {
+      const lista = await db.listas.get(id);
+      if (!lista) throw new Error("lista não encontrada");
+
+      const mesclada: DadosNovaLista = {
+        nome: patch.nome ?? lista.nome,
+        data: patch.data ?? lista.data,
+        tipo: patch.tipo ?? lista.tipo,
+        orcamentoCentavos: patch.orcamentoCentavos ?? lista.orcamento_centavos,
+        mercado: patch.mercado ?? lista.mercado,
+        formaPagamento: patch.formaPagamento ?? lista.forma_pagamento,
+      };
+
+      const validacao = validarLista(mesclada);
+      if (!validacao.ok) throw new Error(`lista inválida: ${validacao.erros.join("; ")}`);
+
+      const atualizada: ListaRegistro = {
+        ...lista,
+        nome: mesclada.nome.trim(),
+        data: mesclada.data,
+        tipo: mesclada.tipo,
+        orcamento_centavos: mesclada.orcamentoCentavos,
+        mercado: mesclada.mercado?.trim() || undefined,
+        forma_pagamento: mesclada.formaPagamento,
+        atualizado_em: agora(),
+      };
+      await db.listas.put(atualizada);
+      return atualizada;
+    },
+
+    async iniciarCompra(id) {
+      const lista = await db.listas.get(id);
+      if (!lista) throw new Error("lista não encontrada");
+      if (lista.status === "concluida") throw new Error("lista concluída: não é possível comprar de novo (R40)");
+      if (lista.status === "comprando") return lista;
+
+      const emCompra: ListaRegistro = { ...lista, status: "comprando", atualizado_em: agora() };
+      await db.listas.put(emCompra);
+      return emCompra;
+    },
+
+    async exportarBackup() {
+      const [listas, itens, produtos] = await Promise.all([
+        db.listas.toArray(),
+        db.itens.toArray(),
+        db.produtos.toArray(),
+      ]);
+      return JSON.stringify({ versao: 1, exportadoEm: agora(), listas, itens, produtos }, null, 2);
+    },
+
+    async importarBackup(json) {
+      let bruto: unknown;
+      try {
+        bruto = JSON.parse(json);
+      } catch {
+        throw new Error("backup inválido: JSON malformado");
+      }
+
+      const backup = bruto as {
+        versao?: number;
+        listas?: ListaRegistro[];
+        itens?: ItemRegistro[];
+        produtos?: ProdutoRegistro[];
+      };
+
+      if (
+        !backup ||
+        backup.versao !== 1 ||
+        !Array.isArray(backup.listas) ||
+        !Array.isArray(backup.itens) ||
+        !Array.isArray(backup.produtos)
+      ) {
+        throw new Error("backup inválido: formato inesperado");
+      }
+
+      await db.transaction("rw", db.listas, db.itens, db.produtos, async () => {
+        const mapaListas = new Map<string, string>();
+
+        for (const lista of backup.listas ?? []) {
+          const idNovo = novoId();
+          mapaListas.set(lista.id, idNovo);
+          await db.listas.put({ ...lista, id: idNovo, criado_em: agora(), atualizado_em: agora() });
+        }
+
+        for (const item of backup.itens ?? []) {
+          const listaId = mapaListas.get(item.lista_id);
+          if (!listaId) continue;
+          await db.itens.put({
+            ...item,
+            id: novoId(),
+            lista_id: listaId,
+            produto_id: null,
+            criado_em: agora(),
+            atualizado_em: agora(),
+          });
+        }
+
+        for (const produto of backup.produtos ?? []) {
+          const existente = await db.produtos
+            .where("nome_normalizado")
+            .equals(produto.nome_normalizado)
+            .first();
+          if (existente) continue;
+          await db.produtos.put({ ...produto, id: novoId(), criado_em: agora(), atualizado_em: agora() });
+        }
+      });
+
+      return { importados: (backup.listas ?? []).length };
+    },
+
     async obterLista(id) {
       return db.listas.get(id);
     },
@@ -171,7 +304,7 @@ export function criarRepositorio(db: BancoListo): Repositorio {
       });
     },
 
-    async adicionarItem(listaId, dados) {
+    async adicionarItem(listaId, dados, opcoes) {
       exigirEditavel(await db.listas.get(listaId));
       const validacao = validarItem(dados);
       if (!validacao.ok) throw new Error(`item inválido: ${validacao.erros.join("; ")}`);
@@ -185,7 +318,7 @@ export function criarRepositorio(db: BancoListo): Repositorio {
           nome: dados.nome.trim(),
           quantidade_milesimos: dados.quantidadeMilesimos,
           preco_unitario_centavos: dados.precoUnitarioCentavos,
-          adquirido: false,
+          adquirido: opcoes?.adquirido ?? false,
           ordem: await proximaOrdem(listaId),
           criado_em: agora(),
           atualizado_em: agora(),
