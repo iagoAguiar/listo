@@ -1,19 +1,19 @@
 # BOARD — ListO
 
-**Fase:** 1 (produto) — escopo recortado, aguardando decisão do Iago
+**Fase:** 2 (spec) — spec do MVP escrita, aguardando gate do Iago
 **Repo:** `github.com/iagoAguiar/listo` (privado) · branch `main`
-**Gate:** fechado. `spec.md` ainda não existe.
+**Gate:** fechado. `spec.md` existe (sem `.hermes-flow/gates/spec.approved`).
 
 ## Estado
 
-- Doc base copiado para `docs/base/ListO-base.md` (923 linhas, sha256 `7a86225e…`).
-- `intent.md` escrito; `ROADMAP.md` com o recorte MVP (8 blocos) / V1 (7) / V2 (7) / V3 (6).
-- Pendências do doc base listadas no `ROADMAP.md`: RF-006/007 duplicados, nome "Plano de
-  Compra" no lugar de ListO, CPF/endereço obrigatórios, link quebrado na msg de erro.
+- Escopo e stack aprovados (A-01..A-06). Front em D-003, backend da V1 em D-004.
+- `_hermes/spec.md` escrito: 44 requisitos (R1–R44) em 9 blocos (M-01..M-09) e 44 critérios
+  de aceite (CA-R1..CA-R44), mais modelo de dados, telas, fora de escopo e 5 riscos.
+- `AVALIACAO-BACKEND.md` registra a comparação FastAPI × Fastify × Nest.
 
 ## Próximo
 
-1. Iago responde A-01..A-06 em `APROVACOES.md`.
-2. Escrevo `_hermes/spec.md` do MVP (requisitos numerados + critério de aceite).
-3. Gate: fala de aprovação → `.hermes-flow/gates/spec.approved`.
-4. Testes de aceite do M-01..M-08 congelados → build por fatia.
+1. Iago aprova a spec (A-07) → gravo `.hermes-flow/gates/spec.approved` com sha256 e a fala.
+2. Escrevo `tests/` de aceite a partir dos CA-R, vejo vermelho, congelo em
+   `.hermes-flow/frozen-tests.txt` e commito.
+3. Build fatia por fatia (M-01 → M-09), commit atômico por fatia.

@@ -23,3 +23,31 @@ modelo, API, banco e store.
 **Consequência:** comparação de orçamento é exata; total do dashboard e total da lista
 fecham no mesmo centavo independente da ordem de soma; nenhum `0.30000000000000004` vaza
 para a tela.
+
+## D-003 — Stack do app: Vite + React + TypeScript + Dexie + Zustand + Tailwind
+
+**Data:** 2026-11-22 · **Aprovação:** A-05 ("Ok, mas o backend não quero via Supabase…")
+**Contexto:** o app é PWA mobile-first, offline-first, com estado local rico (lista, itens,
+carrinho) e dinheiro em centavos. Precedente no disco: `Lista_de_Compras` (Vite + MD3 + PWA).
+**Decisão:** `vite` 8 + `react` 19 + `typescript` 7 `strict`; dados em IndexedDB via `dexie` 4
+com esquema versionado; estado de tela com `zustand` 5; CSS com `tailwindcss` 4 + tokens do
+design system (a fechar na fase de design); validação com `zod` 4; testes com `vitest` 5 +
+Testing Library e `@playwright/test` 1.65 (viewport de celular) para os fluxos de aceite;
+PWA com Workbox.
+**Consequência:** sem SSR (não serve app offline-first) e sem kit de UI genérico. TypeScript
+`strict` é o que sustenta o D-002: `type Centavos` no código inteiro + teste estático que
+reprova dinheiro como `number` solto.
+
+## D-004 — Backend da V1: FastAPI + Postgres
+
+**Data:** 2026-11-22 · **Aprovação:** A-05 ("ok aceito ser feito em FastAPI")
+**Contexto:** Supabase descartado pelo Iago. Candidatos avaliados em `AVALIACAO-BACKEND.md`
+(FastAPI, Fastify+Zod, NestJS). O domínio é pequeno (~6 recursos, CRUD + auth + 3 agregações)
+e a casa já roda FastAPI no `Painel_SDLC`.
+**Decisão:** FastAPI 0.165 + SQLAlchemy 2.1 + Alembic 1.20 + Pydantic 2.14 + `argon2-cffi`,
+servido por uvicorn 0.54; Postgres 16 em Docker; pytest + httpx para API e Playwright para E2E.
+Sessão por token opaco em cookie `HttpOnly` (sem JWT no cliente). Sync por
+`POST /sync/push` + `GET /sync/pull?since=`, conflito resolvido por `updated_at`.
+**Consequência:** backend entra só na V1 — o MVP não depende dele. NestJS fica reservado para
+o cenário de colaboração em tempo real (V3-01) com time maior. Tipos do front vêm do OpenAPI
+via `openapi-typescript`.
