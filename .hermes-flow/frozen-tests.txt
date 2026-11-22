@@ -2,5 +2,6 @@
 # Editar qualquer arquivo listado aqui exige `touch .hermes-flow/gates/tests.unlock`
 # com justificativa em DECISOES.md. Nunca desbloquear para ficar verde.
 tests/aceite/dinheiro.test.ts
-tests/aceite/lista.test.ts
 tests/aceite/itens.test.ts
+tests/aceite/lista.test.ts
+tests/aceite/persistencia.test.ts
