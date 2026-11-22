@@ -232,3 +232,88 @@ button.discreto {
   display: grid;
   gap: 12px;
 }
+
+.totais.duplo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.linha-principal {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.linha-edicao {
+  display: grid;
+  grid-template-columns: 5.5rem 6.5rem;
+  gap: 8px;
+}
+
+.linha-edicao input {
+  padding: 8px;
+  font-size: 14px;
+}
+
+.riscado {
+  text-decoration: line-through;
+  color: var(--suave);
+}
+
+.etiqueta {
+  white-space: nowrap;
+}
+
+.sugestoes {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+}
+
+.sugestoes button {
+  width: 100%;
+  text-align: left;
+  background: #f4faf8;
+}
+
+.rodape-acao.duplo {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 12px;
+}
+
+.botao-secundario {
+  min-width: 56px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.oculto {
+  display: none;
+}
+
+.zona-perigo {
+  margin-top: 24px;
+}
+
+.perigo {
+  background: var(--perigo);
+  border-color: var(--perigo);
+  color: #fff;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox input {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+}
