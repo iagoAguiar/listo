@@ -7,3 +7,4 @@ tests/aceite/lista.test.ts
 tests/aceite/persistencia.test.ts
 tests/aceite/telas.test.tsx
 tests/aceite/compra.test.tsx
+tests/aceite/restante.test.tsx
