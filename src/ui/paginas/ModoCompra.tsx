@@ -20,13 +20,10 @@ export default function ModoCompra() {
   const [novaQuantidade, setNovaQuantidade] = useState("1");
   const [salvarNoCatalogo, setSalvarNoCatalogo] = useState(true);
 
-  const [edicoes, setEdicoes] = useState<Record<string, { preco?: string; quantidade?: string }>>({});
-
   async function recarregar() {
     const [registro, listaDeItens] = await Promise.all([repo.obterLista(id), repo.listarItens(id)]);
     setLista(registro ?? null);
     setItens(listaDeItens);
-    setEdicoes({});
   }
 
   useEffect(() => {
@@ -54,22 +51,21 @@ export default function ModoCompra() {
     await recarregar();
   }
 
-  function editarLocal(itemId: string, campo: "preco" | "quantidade", valor: string) {
-    setEdicoes((atual) => ({
-      ...atual,
-      [itemId]: { ...atual[itemId], [campo]: campo === "preco" ? mascararDinheiro(valor) : valor.replace(/[^\d.,]/g, "") },
-    }));
-  }
-
-  async function confirmarEdicao(item: ItemRegistro) {
-    const edicao = edicoes[item.id];
-    if (!edicao) return;
-
+  /** Campos de preço e quantidade são não-controlados: a máscara escreve no próprio DOM
+   *  e o commit acontece no blur, lendo o valor final do campo. */
+  async function salvarEdicao(item: ItemRegistro, campo: "preco" | "quantidade", texto: string) {
     try {
       const patch: { precoUnitarioCentavos?: number; quantidadeMilesimos?: number } = {};
-      if (edicao.preco) patch.precoUnitarioCentavos = paraCentavos(edicao.preco);
-      if (edicao.quantidade) patch.quantidadeMilesimos = paraMilesimos(edicao.quantidade);
-      if (Object.keys(patch).length === 0) return;
+
+      if (campo === "preco") {
+        const centavos = texto ? paraCentavos(texto) : 0;
+        if (centavos === item.preco_unitario_centavos) return;
+        patch.precoUnitarioCentavos = centavos;
+      } else {
+        const milesimos = paraMilesimos(texto || "1");
+        if (milesimos === item.quantidade_milesimos) return;
+        patch.quantidadeMilesimos = milesimos;
+      }
 
       await repo.editarItem(item.id, patch);
       setErro("");
@@ -126,7 +122,6 @@ export default function ModoCompra() {
 
       <ul className="lista-limpa">
         {ordenados.map((item) => {
-          const edicao = edicoes[item.id];
           return (
             <li
               key={item.id}
@@ -153,18 +148,24 @@ export default function ModoCompra() {
 
               <div className="linha-edicao">
                 <input
+                  key={`qtd-${item.id}-${item.quantidade_milesimos}`}
                   aria-label={`Quantidade de ${item.nome}`}
                   inputMode="decimal"
-                  value={edicao?.quantidade ?? formatarQuantidade(item.quantidade_milesimos)}
-                  onChange={(e) => editarLocal(item.id, "quantidade", e.target.value)}
-                  onBlur={() => void confirmarEdicao(item)}
+                  defaultValue={formatarQuantidade(item.quantidade_milesimos)}
+                  onChange={(e) => {
+                    e.target.value = e.target.value.replace(/[^\d.,]/g, "");
+                  }}
+                  onBlur={(e) => void salvarEdicao(item, "quantidade", e.target.value)}
                 />
                 <input
+                  key={`preco-${item.id}-${item.preco_unitario_centavos}`}
                   aria-label={`Preço de ${item.nome}`}
                   inputMode="numeric"
-                  value={edicao?.preco ?? mascararDinheiro(String(item.preco_unitario_centavos))}
-                  onChange={(e) => editarLocal(item.id, "preco", e.target.value)}
-                  onBlur={() => void confirmarEdicao(item)}
+                  defaultValue={mascararDinheiro(String(item.preco_unitario_centavos))}
+                  onChange={(e) => {
+                    e.target.value = mascararDinheiro(e.target.value);
+                  }}
+                  onBlur={(e) => void salvarEdicao(item, "preco", e.target.value)}
                 />
               </div>
             </li>
