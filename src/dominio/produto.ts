@@ -1,4 +1,5 @@
 import type { Centavos } from "./dinheiro";
+import { normalizarNome } from "./item";
 
 export interface Produto {
   id: string;
@@ -13,21 +14,59 @@ export interface ItemParaCatalogo {
   precoUnitarioCentavos: Centavos;
 }
 
+const MAX_SUGESTOES = 5;
+
+function novoId(): string {
+  const cripto = globalThis.crypto as Crypto | undefined;
+  if (cripto?.randomUUID) return cripto.randomUUID();
+  return `p_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 /**
  * R14: todo item gravado alimenta o catálogo. Cria o produto quando o nome
  * normalizado não existe e atualiza o último preço quando existe, sem duplicar.
+ * Devolve catálogo novo — não muta o array recebido.
  */
 export function aplicarItemAoCatalogo(
-  _catalogo: Produto[],
-  _item: ItemParaCatalogo,
+  catalogo: Produto[],
+  item: ItemParaCatalogo,
 ): Produto[] {
-  throw new Error("não implementado: aplicarItemAoCatalogo (R14)");
+  const nomeNormalizado = normalizarNome(item.nome);
+  if (!nomeNormalizado) throw new Error("entrada inválida: nome do item vazio");
+
+  const indice = catalogo.findIndex((produto) => produto.nomeNormalizado === nomeNormalizado);
+  if (indice === -1) {
+    const novo: Produto = {
+      id: novoId(),
+      nome: item.nome.trim(),
+      nomeNormalizado,
+      precoPadraoCentavos: item.precoUnitarioCentavos,
+      ultimoPrecoCentavos: item.precoUnitarioCentavos,
+    };
+    return [...catalogo, novo];
+  }
+
+  const atual = catalogo[indice];
+  if (!atual) return catalogo;
+
+  const resultado = [...catalogo];
+  resultado[indice] = { ...atual, ultimoPrecoCentavos: item.precoUnitarioCentavos };
+  return resultado;
 }
 
-/** R10/R11: até 5 sugestões do catálogo por nome normalizado, com o preço a sugerir. */
+/** R10/R11: até 5 sugestões por trecho do nome normalizado, com o último preço. */
 export function sugerirProdutos(
-  _catalogo: Produto[],
-  _textoDigitado: string,
+  catalogo: Produto[],
+  textoDigitado: string,
 ): Array<{ nome: string; precoSugeridoCentavos: Centavos }> {
-  throw new Error("não implementado: sugerirProdutos (R10, R11)");
+  const trecho = normalizarNome(textoDigitado);
+  if (!trecho) return [];
+
+  return catalogo
+    .filter((produto) => produto.nomeNormalizado.includes(trecho))
+    .slice(0, MAX_SUGESTOES)
+    .map((produto) => ({
+      nome: produto.nome,
+      precoSugeridoCentavos: produto.ultimoPrecoCentavos || produto.precoPadraoCentavos,
+    }));
 }
