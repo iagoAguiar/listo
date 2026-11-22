@@ -65,3 +65,12 @@ de 8 s) ou pela ação em lote "Excluir não marcados" no resumo (R45, nova).
 **Consequência:** o gasto do mês reflete a lista inteira, não o que foi riscado no corredor.
 Risco de leitura errada pelo usuário → o resumo escancara "X marcados / Y não marcados" e
 oferece a exclusão em lote.
+## D-006 — Integração em `main`, `develop` quando houver segundo colaborador
+
+**Contexto:** o fluxo v5 da skill de QA manda integrar em `develop` com `--no-ff`. O ListO é
+um repositório de agente único: `main` nasceu no commit inicial e é o que o Iago clona.
+**Decisão:** enquanto o projeto tiver um único autor, `main` é a linha de integração e recebe
+os commits de fatia direto (build + QA + push verificados antes). `develop` só passa a existir
+quando houver segundo colaborador ou release para fora.
+**Consequência:** sem branches descartáveis por fatia; o histórico linear de `main` é o
+registro. Merge em `main` de release publicada continua exigindo fala do Iago.
