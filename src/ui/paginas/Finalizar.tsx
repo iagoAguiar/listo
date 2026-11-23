@@ -60,7 +60,7 @@ export default function Finalizar() {
 
       <section className="cartao destaque">
         <span className="rotulo">Valor final</span>
-        <strong className="valor" data-testid="valor-final">
+        <strong className="dinheiro-grande" data-testid="valor-final">
           {formatarBRL(valorFinal)}
         </strong>
         <span className="detalhe" data-testid="contagem">

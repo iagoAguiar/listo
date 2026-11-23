@@ -1,6 +1,6 @@
 # BOARD — ListO
 
-**Fase:** 4 (QA fechado) — MVP entregue em `main`, `REVIEW: passou` no SHA `6fdb566`
+**Fase:** redesign mobile-first aplicado (2026-11-23) — MVP entregue, `REVIEW: passou` no SHA `6fdb566`
 **Repo:** `github.com/iagoAguiar/listo` (privado) · branch `main`
 **Gate:** **aberto.** `.hermes-flow/gates/spec.approved` com `sha256 5867893f…`
 e a fala "Aprovado" (Iago, 2026-11-22).

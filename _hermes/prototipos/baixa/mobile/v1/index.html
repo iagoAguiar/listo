@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ListO — protótipo mobile</title>
+<style>
+  :root { --fundo:#ECFDF5; --superficie:#fff; --texto:#0F172A; --suave:#475569; --linha:#D1E7E0;
+          --destaque:#047857; --perigo:#DC2626; --ok-fundo:#D1FAE5; --aviso-fundo:#FEF3C7; --aviso-texto:#92400E; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:#94a3b8; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--texto); }
+  .moldura { width:390px; height:844px; margin:24px auto; background:var(--fundo); border-radius:28px; overflow:hidden;
+             position:relative; box-shadow:0 20px 60px rgba(15,23,42,.35); display:flex; flex-direction:column; }
+  header.topo { padding:28px 16px 8px; display:flex; align-items:baseline; justify-content:space-between; }
+  header.topo h1 { font-size:28px; margin:0; letter-spacing:-0.02em; }
+  .conteudo { flex:1; overflow:auto; padding:8px 16px 16px; }
+  .rotulo { font-size:13px; color:var(--suave); }
+  .dinheiro { font-size:34px; font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-0.02em; }
+  .cartao { background:#fff; border:1px solid var(--linha); border-radius:14px; padding:14px; margin-bottom:10px; }
+  .linha { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .valor { font-variant-numeric:tabular-nums; font-weight:650; }
+  .pill { font-size:12px; padding:3px 10px; border-radius:999px; background:#eef2f1; color:var(--suave); }
+  .pill.ok { background:var(--ok-fundo); color:#065F46; }
+  .pill.aviso { background:var(--aviso-fundo); color:var(--aviso-texto); }
+  .item { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--linha); border-radius:14px; padding:12px; margin-bottom:8px; min-height:64px; }
+  .item .nome { font-weight:600; }
+  .item .sub { font-size:13px; color:var(--suave); }
+  .check { width:28px; height:28px; border-radius:8px; border:2px solid var(--destaque); flex:none; }
+  .check.on { background:var(--destaque); }
+  .marcado { background:var(--ok-fundo); border-color:#A7F3D0; }
+  .marcado .nome { text-decoration:line-through; color:var(--suave); }
+  nav.barra { display:flex; border-top:1px solid var(--linha); background:#fff; padding:6px 0 18px; }
+  nav.barra a { flex:1; text-align:center; text-decoration:none; color:var(--suave); font-size:12px; font-weight:600; padding:6px 0; }
+  nav.barra a.ativo { color:var(--destaque); }
+  nav.barra svg { display:block; margin:0 auto 2px; }
+  .cta { position:absolute; left:16px; right:16px; bottom:28px; background:var(--destaque); color:#fff; text-align:center;
+         padding:16px; border-radius:14px; font-weight:700; font-size:16px; }
+  .trio { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:left; }
+  .trio strong { display:block; font-size:16px; font-variant-numeric:tabular-nums; }
+  .neg { color:var(--perigo); }
+  h2 { font-size:15px; margin:18px 0 8px; }
+  .btn-topo { background:var(--destaque); color:#fff; border-radius:999px; padding:8px 14px; font-size:14px; font-weight:700; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="moldura">
+  <header class="topo">
+    <h1>ListO</h1>
+  </header>
+  <div class="conteudo">
+    <div class="cartao">
+      <span class="rotulo">Gasto em novembro</span>
+      <div class="dinheiro">R$ 486,40</div>
+      <span class="rotulo">3 compras concluídas</span>
+    </div>
+
+    <h2>Últimas compras</h2>
+    <div class="cartao linha">
+      <div><strong>Compras de novembro</strong><div class="rotulo">22 nov</div></div>
+      <div style="text-align:right"><span class="pill ok">Concluída</span><div class="valor">R$ 312,90</div></div>
+    </div>
+    <div class="cartao linha">
+      <div><strong>Feira da semana</strong><div class="rotulo">15 nov</div></div>
+      <div style="text-align:right"><span class="pill ok">Concluída</span><div class="valor">R$ 128,50</div></div>
+    </div>
+    <div class="cartao linha">
+      <div><strong>Açougue</strong><div class="rotulo">08 nov</div></div>
+      <div style="text-align:right"><span class="pill ok">Concluída</span><div class="valor">R$ 45,00</div></div>
+    </div>
+
+    <h2>Em andamento</h2>
+    <div class="cartao linha">
+      <div><strong>Lista de hoje</strong><div class="rotulo">4 itens · 22 nov</div></div>
+      <div style="text-align:right"><span class="pill aviso">Comprando</span><div class="valor">R$ 54,29</div></div>
+    </div>
+  </div>
+  <nav class="barra">
+    <a class="ativo" href="#">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+      Início</a>
+    <a href="#">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg>
+      Listas</a>
+    <a href="#">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9c.3.6.9 1 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      Ajustes</a>
+  </nav>
+</div>
+
+<div class="moldura">
+  <header class="topo"><h1 style="font-size:22px">Lista de hoje</h1><span class="pill aviso">Comprando</span></header>
+  <div class="conteudo">
+    <div class="cartao trio">
+      <div><span class="rotulo">Estimado</span><strong>R$ 54,29</strong></div>
+      <div><span class="rotulo">Orçamento</span><strong>R$ 150,00</strong></div>
+      <div><span class="rotulo">Saldo</span><strong style="color:#047857">R$ 95,71</strong></div>
+    </div>
+    <div class="item">
+      <div class="check"></div>
+      <div style="flex:1"><div class="nome">Leite integral</div><div class="sub">1 × R$ 4,49</div></div>
+      <strong class="valor">R$ 4,49</strong>
+    </div>
+    <div class="item marcado">
+      <div class="check on"></div>
+      <div style="flex:1"><div class="nome">Arroz 5kg</div><div class="sub">2 × R$ 24,90</div></div>
+      <strong class="valor">R$ 49,80</strong>
+    </div>
+    <div class="item">
+      <div class="check"></div>
+      <div style="flex:1"><div class="nome">Café 500g</div><div class="sub">1 × R$ 0,00</div></div>
+      <strong class="valor neg">sem preço</strong>
+    </div>
+  </div>
+  <div class="cta">Iniciar compra</div>
+</div>
+</body>
+</html>

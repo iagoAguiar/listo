@@ -34,10 +34,7 @@ export default function Inicio() {
     <main className="tela">
       <header className="cabecalho">
         <h1>ListO</h1>
-        <nav className="acoes">
-          <Link to="/listas">Ver listas</Link>
-          <Link to="/listas/nova">Nova lista</Link>
-        </nav>
+        <Link className="botao-topo" to="/listas/nova">Nova lista</Link>
       </header>
 
       {!carregado ? (
@@ -46,7 +43,7 @@ export default function Inicio() {
         <>
           <section className="cartao destaque">
             <span className="rotulo">Gasto no mês</span>
-            <strong className="valor" data-testid="total-do-mes">
+            <strong className="dinheiro-grande" data-testid="total-do-mes">
               {formatarBRL(total)}
             </strong>
           </section>

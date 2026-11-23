@@ -40,10 +40,7 @@ export default function Listas() {
     <main className="tela">
       <header className="cabecalho">
         <h1>Listas</h1>
-        <nav className="acoes">
-          <Link to="/">Início</Link>
-          <Link to="/listas/nova">Nova lista</Link>
-        </nav>
+        <Link className="botao-topo" to="/listas/nova">Nova lista</Link>
       </header>
 
       {!carregado ? (
@@ -58,11 +55,17 @@ export default function Listas() {
                 ? (lista.valor_final_centavos ?? 0)
                 : lista.totalEstimadoCentavos;
             return (
-              <li key={lista.id} data-testid="card-lista" className="cartao">
-                <Link to={`/listas/${lista.id}`}>{lista.nome}</Link>
-                <span className="data">{lista.data}</span>
-                <span className="etiqueta">{rotuloStatus[lista.status] ?? lista.status}</span>
-                <strong className="valor">{formatarBRL(valor)}</strong>
+              <li key={lista.id} data-testid="card-lista">
+                <Link to={`/listas/${lista.id}`} className="cartao cartao-link">
+                  <span>
+                    <span className="nome">{lista.nome}</span>
+                    <span className="data">{lista.data}</span>
+                  </span>
+                  <span className="bloco-direita">
+                    <span className={`etiqueta ${lista.status}`}>{rotuloStatus[lista.status] ?? lista.status}</span>
+                    <strong className="valor">{formatarBRL(valor)}</strong>
+                  </span>
+                </Link>
               </li>
             );
           })}

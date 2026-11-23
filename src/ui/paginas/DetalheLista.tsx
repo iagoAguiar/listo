@@ -112,18 +112,11 @@ export default function DetalheLista() {
   }
 
   return (
-    <main className="tela">
+    <main className="tela tarefa">
       <header className="cabecalho">
         <h1>{lista.nome}</h1>
         <nav className="acoes">
-          <Link to="/listas">Listas</Link>
-          {somenteLeitura ? null : <Link to={`/listas/${id}/editar`}>Editar lista</Link>}
-          {somenteLeitura ? null : (
-            <Link to={`/listas/${id}/compra`} onClick={() => void repo.iniciarCompra(id)}>
-              Iniciar compra
-            </Link>
-          )}
-          {somenteLeitura ? null : <Link to={`/listas/${id}/finalizar`}>Finalizar</Link>}
+          {somenteLeitura ? null : <Link to={`/listas/${id}/editar`}>Editar</Link>}
         </nav>
       </header>
 
@@ -159,7 +152,7 @@ export default function DetalheLista() {
       {somenteLeitura ? (
         <p className="aviso">Lista concluída — somente leitura.</p>
       ) : (
-        <form className="formulario linha" onSubmit={adicionar}>
+        <form className="formulario grade-adicionar" onSubmit={adicionar}>
           <label>
             Item
             <input value={nome} onChange={(e) => setNome(e.target.value)} maxLength={80} />
@@ -264,6 +257,14 @@ export default function DetalheLista() {
           </button>
         </div>
       ) : null}
+
+      {somenteLeitura ? null : (
+        <footer className="rodape-acao">
+          <Link className="botao" to={`/listas/${id}/compra`} onClick={() => void repo.iniciarCompra(id)}>
+            Iniciar compra
+          </Link>
+        </footer>
+      )}
     </main>
   );
 }

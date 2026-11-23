@@ -1,5 +1,4 @@
 import { useRef, useState, type ChangeEvent } from "react";
-import { Link } from "react-router-dom";
 import { useRepositorio } from "../Provedor";
 import { mensagemDeErro } from "../formato";
 
@@ -50,10 +49,6 @@ export default function Ajustes() {
     <main className="tela">
       <header className="cabecalho">
         <h1>Ajustes</h1>
-        <nav className="acoes">
-          <Link to="/">Início</Link>
-          <Link to="/listas">Listas</Link>
-        </nav>
       </header>
 
       <section className="cartao">

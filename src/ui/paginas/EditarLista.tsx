@@ -55,7 +55,7 @@ export default function EditarLista() {
   }
 
   return (
-    <main className="tela">
+    <main className="tela tarefa">
       <header className="cabecalho">
         <h1>Editar lista</h1>
         <nav className="acoes">
@@ -112,7 +112,7 @@ export default function EditarLista() {
             {erro}
           </p>
         ) : null}
-        <button type="submit">Salvar alterações</button>
+        <button type="submit" className="primario">Salvar alterações</button>
       </form>
 
       <p className="detalhe">Orçamento atual: {formatarBRL(lista.orcamento_centavos)}</p>

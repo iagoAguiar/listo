@@ -99,7 +99,7 @@ export default function ModoCompra() {
   }
 
   return (
-    <main className="tela compra">
+    <main className="tela tarefa compra">
       <header className="cabecalho">
         <Link to={`/listas/${id}`}>Voltar</Link>
         <h1>{lista.nome}</h1>
@@ -125,7 +125,7 @@ export default function ModoCompra() {
           return (
             <li
               key={item.id}
-              className={item.adquirido ? "item-compra marcado" : "item-compra"}
+              className={item.adquirido ? "item item-compra marcado" : "item item-compra"}
               data-testid={`linha-item-${slug(item.nome)}`}
             >
               <label className="linha-principal">
@@ -134,10 +134,12 @@ export default function ModoCompra() {
                   checked={item.adquirido}
                   onChange={() => void alternar(item)}
                 />
-                <span className={item.adquirido ? "nome riscado" : "nome"}>{item.nome}</span>
-                <span className="detalhe">
-                  {formatarQuantidade(item.quantidade_milesimos)} ×{" "}
-                  {formatarBRL(item.preco_unitario_centavos)}
+                <span className="item-corpo">
+                  <span className={item.adquirido ? "nome riscado" : "nome"}>{item.nome}</span>
+                  <span className="detalhe">
+                    {formatarQuantidade(item.quantidade_milesimos)} ×{" "}
+                    {formatarBRL(item.preco_unitario_centavos)}
+                  </span>
                 </span>
                 <strong className="valor">
                   {formatarBRL(

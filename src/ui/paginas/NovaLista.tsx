@@ -55,7 +55,7 @@ export default function NovaLista() {
   }
 
   return (
-    <main className="tela">
+    <main className="tela tarefa">
       <header className="cabecalho">
         <h1>Nova lista</h1>
         <nav className="acoes">
@@ -120,7 +120,7 @@ export default function NovaLista() {
           </p>
         ) : null}
 
-        <button type="submit">Salvar lista</button>
+        <button type="submit" className="primario">Salvar lista</button>
       </form>
     </main>
   );
