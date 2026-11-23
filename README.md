@@ -1,8 +1,8 @@
 # ListO
 
-Projeto novo no fluxo v5 (agente único, `sdlc-solo`).
+Lista de compras com orçamento. Funciona no celular, offline, sem conta. Os dados ficam no aparelho, não no servidor.
 
-Estado: fase 0 (preparo). A spec ainda não existe — aguardando detalhes do produto.
+Site: https://iagoaguiar.github.io/listo/
 
 ## Documentos do processo
 

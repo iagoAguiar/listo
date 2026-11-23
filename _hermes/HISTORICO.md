@@ -18,3 +18,11 @@ Append-only. Uma linha por evento relevante, com data.
   campos de edição compactos abaixo.
 - Verificado em viewport 390×844 (6 telas fotografadas) e suíte **92/92** verde, `tsc` limpo,
   build ok. Publicado em `https://notebook-server.tail3cd1af.ts.net/`.
+
+## 2026-11-23 — repo público e GitHub Pages
+
+- Repo `iagoAguiar/listo` passou de privado para público, a pedido do Iago.
+- Site no ar: `https://iagoaguiar.github.io/listo/` (branch `gh-pages`, build com base `/listo/`).
+  Conferido: raiz, JS, CSS, service worker e ícone em HTTP 200; rota `/listas` entrega o app.
+- As listas continuam só no IndexedDB do aparelho. Publicar o site não publica os dados.
+
