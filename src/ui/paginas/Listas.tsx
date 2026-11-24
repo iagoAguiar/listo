@@ -56,7 +56,10 @@ export default function Listas() {
                 : lista.totalEstimadoCentavos;
             return (
               <li key={lista.id} data-testid="card-lista">
-                <Link to={`/listas/${lista.id}`} className="cartao cartao-link">
+                <Link
+                  to={lista.status === "concluida" ? `/listas/${lista.id}` : `/listas/${lista.id}/compra`}
+                  className="cartao cartao-link"
+                >
                   <span>
                     <span className="nome">{lista.nome}</span>
                     <span className="data">{lista.data}</span>

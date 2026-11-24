@@ -320,6 +320,26 @@ button.discreto { border: none; background: transparent; color: var(--perigo); m
   .grade-adicionar label:first-child, .grade-adicionar button { grid-column: auto; }
 }
 
+.compositor { gap: 8px; margin-bottom: 12px; }
+.compositor-campos {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(64px, 0.7fr) minmax(88px, 0.9fr);
+  gap: 8px;
+  align-items: end;
+}
+.compositor-campos label { gap: 4px; font-size: 12px; }
+.compositor-campos input { min-height: 44px; padding: 8px 10px; }
+.compositor label.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--texto);
+}
+.compositor button[type="submit"] { min-height: 48px; }
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }

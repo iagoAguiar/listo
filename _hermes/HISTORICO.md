@@ -26,3 +26,10 @@ Append-only. Uma linha por evento relevante, com data.
   Conferido: raiz, JS, CSS, service worker e ícone em HTTP 200; rota `/listas` entrega o app.
 - As listas continuam só no IndexedDB do aparelho. Publicar o site não publica os dados.
 
+## 2026-11-23 — lista aberta com menos cliques
+
+- Pedido: com a lista aberta, opções de preencher já visíveis e fluxo mais direto.
+- Lista não concluída abre direto no modo compra. Nome, quantidade e preço ficam no topo,
+  sem o toque no "+". O "+" só devolve o foco ao nome. Depois de adicionar, o foco volta.
+- Lista concluída continua no detalhe. 92/92 verdes. Classificação: REUSE do formulário.
+

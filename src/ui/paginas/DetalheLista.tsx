@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import type { ItemRegistro, ListaRegistro } from "../../dados/db";
 import type { SugestaoProduto } from "../../dados/repositorio";
@@ -19,6 +19,7 @@ export default function DetalheLista() {
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const [sugestoes, setSugestoes] = useState<SugestaoProduto[]>([]);
 
+  const campoItem = useRef<HTMLInputElement>(null);
   const [nome, setNome] = useState("");
   const [quantidade, setQuantidade] = useState("");
   const [preco, setPreco] = useState("");
@@ -82,6 +83,7 @@ export default function DetalheLista() {
       setPreco("");
       setSugestoes([]);
       await recarregar();
+      campoItem.current?.focus();
     } catch (problema) {
       setErro(mensagemDeErro(problema).replace(/^item inválido: /, ""));
     }
@@ -120,6 +122,57 @@ export default function DetalheLista() {
         </nav>
       </header>
 
+      {somenteLeitura ? (
+        <p className="aviso">Lista concluída — somente leitura.</p>
+      ) : (
+        <form className="formulario compositor" onSubmit={adicionar}>
+          <div className="compositor-campos">
+            <label>
+              Item
+              <input
+                ref={campoItem}
+                autoFocus={itens.length === 0}
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                maxLength={80}
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              Quantidade
+              <input
+                inputMode="decimal"
+                placeholder="1"
+                value={quantidade}
+                onChange={(e) => setQuantidade(e.target.value.replace(/[^\d.,]/g, ""))}
+              />
+            </label>
+            <label>
+              Preço unitário
+              <input
+                inputMode="numeric"
+                value={preco}
+                onChange={(e) => setPreco(mascararDinheiro(e.target.value))}
+                placeholder="0,00"
+              />
+            </label>
+          </div>
+          <button type="submit">Adicionar</button>
+        </form>
+      )}
+
+      {sugestoes.length > 0 && !somenteLeitura ? (
+        <ul className="sugestoes">
+          {sugestoes.map((sugestao) => (
+            <li key={sugestao.nome}>
+              <button type="button" onClick={() => escolherSugestao(sugestao)}>
+                {sugestao.nome} · {formatarBRL(sugestao.precoSugeridoCentavos)}
+              </button>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
       <section className="cartao totais">
         <div>
           <span className="rotulo">{somenteLeitura ? "Valor final" : "Total estimado"}</span>
@@ -148,48 +201,6 @@ export default function DetalheLista() {
         {formatarBRL(Math.abs(saldo))} {saldo < 0 ? "acima do orçamento" : "abaixo do orçamento"} ·{" "}
         {lista.data}
       </p>
-
-      {somenteLeitura ? (
-        <p className="aviso">Lista concluída — somente leitura.</p>
-      ) : (
-        <form className="formulario grade-adicionar" onSubmit={adicionar}>
-          <label>
-            Item
-            <input value={nome} onChange={(e) => setNome(e.target.value)} maxLength={80} />
-          </label>
-          <label>
-            Quantidade
-            <input
-              inputMode="decimal"
-              placeholder="1"
-              value={quantidade}
-              onChange={(e) => setQuantidade(e.target.value.replace(/[^\d.,]/g, ""))}
-            />
-          </label>
-          <label>
-            Preço unitário
-            <input
-              inputMode="numeric"
-              value={preco}
-              onChange={(e) => setPreco(mascararDinheiro(e.target.value))}
-              placeholder="0,00"
-            />
-          </label>
-          <button type="submit">Adicionar</button>
-        </form>
-      )}
-
-      {sugestoes.length > 0 && !somenteLeitura ? (
-        <ul className="sugestoes">
-          {sugestoes.map((sugestao) => (
-            <li key={sugestao.nome}>
-              <button type="button" onClick={() => escolherSugestao(sugestao)}>
-                {sugestao.nome} · {formatarBRL(sugestao.precoSugeridoCentavos)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
 
       {erro ? (
         <p role="alert" className="erro">

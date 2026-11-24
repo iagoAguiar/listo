@@ -76,6 +76,10 @@ recua. Uso com uma mão, no corredor, com luz ruim e dedão.
 - **Telas de tarefa** (detalhe, compra, finalizar, formulário): sem barra. Voltar é link no topo,
   e o botão de ação fica fixo embaixo, acima da safe area.
 - Roteamento continua o do React Router — voltar do navegador funciona porque nada usa `replace`.
+- Lista não concluída, aberta em Listas, cai direto no modo compra. Nome, quantidade e preço
+  já estão no topo: nenhum toque para revelar o formulário. O "+" só devolve o foco ao nome.
+  Depois de adicionar, o foco volta ao nome. Lista concluída continua no detalhe, só leitura.
+- Classificação: REUSE do formulário e do rodapé. Sem componente novo.
 
 ## O que este sistema não faz
 

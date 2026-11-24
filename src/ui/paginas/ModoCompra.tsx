@@ -1,6 +1,7 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import type { ItemRegistro, ListaRegistro } from "../../dados/db";
+import type { SugestaoProduto } from "../../dados/repositorio";
 import { formatarBRL, paraCentavos, paraMilesimos, parcialCentavos } from "../../dominio/dinheiro";
 import { totalCarrinhoCentavos, totalEstimadoCentavos } from "../../dominio/lista";
 import { useRepositorio } from "../Provedor";
@@ -10,10 +11,13 @@ export default function ModoCompra() {
   const { id = "" } = useParams();
   const repo = useRepositorio();
 
+  const campoNome = useRef<HTMLInputElement>(null);
+  const iniciou = useRef(false);
+
   const [lista, setLista] = useState<ListaRegistro | null>(null);
   const [itens, setItens] = useState<ItemRegistro[]>([]);
-  const [aberto, setAberto] = useState(false);
   const [erro, setErro] = useState("");
+  const [sugestoes, setSugestoes] = useState<SugestaoProduto[]>([]);
 
   const [novoNome, setNovoNome] = useState("");
   const [novoPreco, setNovoPreco] = useState("");
@@ -30,6 +34,29 @@ export default function ModoCompra() {
     void recarregar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, repo]);
+
+  useEffect(() => {
+    if (!lista || lista.status !== "planejamento" || iniciou.current) return;
+    iniciou.current = true;
+    void repo.iniciarCompra(id).then(() => recarregar());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lista, id, repo]);
+
+  useEffect(() => {
+    let ativo = true;
+    const texto = novoNome.trim();
+    if (texto.length < 2) {
+      setSugestoes([]);
+      return undefined;
+    }
+    void (async () => {
+      const achados = await repo.sugerirProdutos(texto);
+      if (ativo) setSugestoes(achados.slice(0, 3));
+    })();
+    return () => {
+      ativo = false;
+    };
+  }, [novoNome, repo]);
 
   if (!lista) return <main className="tela">Carregando…</main>;
 
@@ -75,6 +102,13 @@ export default function ModoCompra() {
     }
   }
 
+  function escolherSugestao(sugestao: SugestaoProduto) {
+    setNovoNome(sugestao.nome);
+    setNovoPreco(mascararDinheiro(String(sugestao.precoSugeridoCentavos)));
+    setSugestoes([]);
+    campoNome.current?.focus();
+  }
+
   async function adicionarRapido(evento: FormEvent) {
     evento.preventDefault();
     setErro("");
@@ -91,8 +125,9 @@ export default function ModoCompra() {
       setNovoNome("");
       setNovoPreco("");
       setNovaQuantidade("1");
-      setAberto(false);
+      setSugestoes([]);
       await recarregar();
+      campoNome.current?.focus();
     } catch (problema) {
       setErro(mensagemDeErro(problema).replace(/^item inválido: /, ""));
     }
@@ -104,6 +139,64 @@ export default function ModoCompra() {
         <Link to={`/listas/${id}`}>Voltar</Link>
         <h1>{lista.nome}</h1>
       </header>
+
+      <form className="formulario compositor" onSubmit={adicionarRapido}>
+        <div className="compositor-campos">
+          <label>
+            Novo item
+            <input
+              ref={campoNome}
+              value={novoNome}
+              onChange={(e) => setNovoNome(e.target.value)}
+              maxLength={80}
+              autoComplete="off"
+            />
+          </label>
+          <label>
+            Qtd
+            <input
+              aria-label="Quantidade"
+              inputMode="decimal"
+              value={novaQuantidade}
+              onChange={(e) => setNovaQuantidade(e.target.value.replace(/[^\d.,]/g, ""))}
+            />
+          </label>
+          <label>
+            Preço
+            <input
+              inputMode="numeric"
+              value={novoPreco}
+              placeholder="0,00"
+              onChange={(e) => setNovoPreco(mascararDinheiro(e.target.value))}
+            />
+          </label>
+        </div>
+        <label className="checkbox">
+          <input
+            type="checkbox"
+            checked={salvarNoCatalogo}
+            onChange={(e) => setSalvarNoCatalogo(e.target.checked)}
+          />
+          Salvar este produto no meu catálogo
+        </label>
+        {sugestoes.length > 0 ? (
+          <ul className="sugestoes">
+            {sugestoes.map((sugestao) => (
+              <li key={sugestao.nome}>
+                <button type="button" onClick={() => escolherSugestao(sugestao)}>
+                  {sugestao.nome} · {formatarBRL(sugestao.precoSugeridoCentavos)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {erro ? (
+          <p role="alert" className="erro">
+            {erro}
+          </p>
+        ) : null}
+        <button type="submit">Adicionar e marcar</button>
+      </form>
 
       <section className="cartao totais duplo">
         <div>
@@ -175,50 +268,13 @@ export default function ModoCompra() {
         })}
       </ul>
 
-      {erro ? (
-        <p role="alert" className="erro">
-          {erro}
-        </p>
-      ) : null}
-
-      {aberto ? (
-        <form className="formulario cartao" onSubmit={adicionarRapido}>
-          <h2>Novo item</h2>
-          <label>
-            Novo item
-            <input value={novoNome} onChange={(e) => setNovoNome(e.target.value)} maxLength={80} />
-          </label>
-          <label>
-            Preço
-            <input
-              inputMode="numeric"
-              value={novoPreco}
-              placeholder="0,00"
-              onChange={(e) => setNovoPreco(mascararDinheiro(e.target.value))}
-            />
-          </label>
-          <label>
-            Quantidade
-            <input
-              inputMode="decimal"
-              value={novaQuantidade}
-              onChange={(e) => setNovaQuantidade(e.target.value.replace(/[^\d.,]/g, ""))}
-            />
-          </label>
-          <label className="checkbox">
-            <input
-              type="checkbox"
-              checked={salvarNoCatalogo}
-              onChange={(e) => setSalvarNoCatalogo(e.target.checked)}
-            />
-            Salvar este produto no meu catálogo
-          </label>
-          <button type="submit">Adicionar e marcar</button>
-        </form>
-      ) : null}
-
       <footer className="rodape-acao duplo">
-        <button type="button" aria-label="+" className="botao-secundario" onClick={() => setAberto(!aberto)}>
+        <button
+          type="button"
+          aria-label="+"
+          className="botao-secundario"
+          onClick={() => campoNome.current?.focus()}
+        >
           +
         </button>
         <Link className="botao" to={`/listas/${id}/finalizar`}>
